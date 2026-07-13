@@ -1,6 +1,9 @@
 package com.example.api;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +58,29 @@ public class DerbyHelloController {
                         rs.getInt("destination_planet_id"),
                         rs.getString("destination_planet_name"),
                         rs.getBigDecimal("distance")));
+    }
+
+    @GetMapping("/planets-and-connections")
+    public List<PlanetWithConnections> planetsAndConnections() {
+        List<Planet> allPlanets = planets();
+        List<RouteWithNames> allRoutes = routesWithNames();
+
+        Map<Integer, List<PlanetConnection>> connectionsByOrigin = new LinkedHashMap<>();
+        for (RouteWithNames route : allRoutes) {
+            connectionsByOrigin
+                    .computeIfAbsent(route.originPlanetId(), id -> new ArrayList<>())
+                    .add(new PlanetConnection(
+                            route.destinationPlanetId(), route.destinationPlanetName(), route.distance()));
+        }
+
+        List<PlanetWithConnections> result = new ArrayList<>();
+        for (Planet planet : allPlanets) {
+            result.add(new PlanetWithConnections(
+                    planet.id(),
+                    planet.name(),
+                    connectionsByOrigin.getOrDefault(planet.id(), List.of())));
+        }
+        return result;
     }
 
 }
