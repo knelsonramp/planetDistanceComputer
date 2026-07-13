@@ -1,4 +1,4 @@
-C	RnEATE TABLE greeting (
+CREATE TABLE greeting (
     id INTEGER PRIMARY KEY,
     message VARCHAR(100)
 );

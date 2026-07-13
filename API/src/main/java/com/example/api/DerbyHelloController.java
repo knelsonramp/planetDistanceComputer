@@ -37,4 +37,24 @@ public class DerbyHelloController {
                         rs.getBigDecimal("distance")));
     }
 
+    @GetMapping("/routes-with-names")
+    public List<RouteWithNames> routesWithNames() {
+        return jdbcTemplate.query(
+                """
+                SELECT r.id, r.origin_planet_id, o.name AS origin_planet_name,
+                       r.destination_planet_id, d.name AS destination_planet_name, r.distance
+                FROM routes r
+                JOIN planets o ON o.id = r.origin_planet_id
+                JOIN planets d ON d.id = r.destination_planet_id
+                ORDER BY r.id
+                """,
+                (rs, rowNum) -> new RouteWithNames(
+                        rs.getInt("id"),
+                        rs.getInt("origin_planet_id"),
+                        rs.getString("origin_planet_name"),
+                        rs.getInt("destination_planet_id"),
+                        rs.getString("destination_planet_name"),
+                        rs.getBigDecimal("distance")));
+    }
+
 }
